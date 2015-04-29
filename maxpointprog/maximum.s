@@ -6,15 +6,13 @@
 # %edi - Holds the index of the data item to be examined
 # %ebx - Largest data item found
 # %eax - Current data item
-#
-# The following memory locations are used: 
-# data_items - contains the item data. A 0 is used to terminate the data
+# # The following memory locations are used: # data_items - contains the item data. A 0 is used to terminate the data
 #
 
 .section .data
 
 data_items:		#These are the data items. Note that 0 is the end.
-	.long 3,67,34,245,45,75,54,34,44,33,22,11,66,0
+	.long 246,67,34,245,45,75,54,34,44,33,22,11,66,0
 
 .section .text
 
@@ -24,16 +22,13 @@ data_items:		#These are the data items. Note that 0 is the end.
 
 
 _start:
-
-	pushl data_items	# This should put the start address of 
+	pushl $data_items		# This should put the start address of 
 				# data_items on the stack
 	call  find_max		# Call the function to search the list
 
 	addl $4, %esp		# Clean up the stack.
-
 	movl $1, %eax		# Setup %eax for call the kernel
 	int  $0x80		# Interrupt x80. Control to kernel
-
 
 .type find_max,@function
 
@@ -43,11 +38,10 @@ find_max:
 				# Remember 8(%ebp) would the start address
 				# of data_items
 	
-	movl $0, %edi			# move 0 into the index register
-	movl 8(%ebp), %ecx	# load the first byte of data
-	movl %ecx, %eax
-	movl %eax, %ebx			# since this is the first item
-					# %eax is the largest.
+	movl $0, %edi		# move 0 into the index register
+	movl 8(%ebp), %ecx	# load the first byte of data movl %ecx, %eax
+	movl (%ecx,%edi,4), %ebx		# since this is the first item
+        movl %ebx, %eax		# %eax is the largest.
 
 	start_loop:
 	cmpl $0, %eax			# check to see if we hit the end.
@@ -63,4 +57,4 @@ find_max:
 	loop_exit:
 	movl %ebp, %esp
 	popl %ebp
-	ret	
+	ret
