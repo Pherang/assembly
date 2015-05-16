@@ -42,7 +42,7 @@
 #from the data file and written from into 
 #the output file. Should never exceed 16,000 
 #for various reasons.
-.equ BUFFER_SIZE, 500
+.equ BUFFER_SIZE, 50
 .lcomm BUFFER_DATA, BUFFER_SIZE
 
 #Remember .text is an assembler directive for code and instructions.

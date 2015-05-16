@@ -70,6 +70,10 @@ movl %esp, %ebp
 subl $ST_SIZE_RESERVE, %esp
 
 open_standardfiles:
+#In this case we don't need the open and close system calls since
+#we already have the file descriptor numbers given by the Linux kernel
+#With some tweaks we could probably have this program take stdin
+#and output it to a file.
 
 store_std_in:
 #save the input file descriptor
