@@ -8,9 +8,7 @@
 #	      Go through each byte of memory.
 #	      If the byte is in lowercase convert it to upper case.
 #	      Write the memory buffer to the output file.
-
-.section .data
-
+.section .data 
 #CONSTANTS
 
 #system call numbers
@@ -33,7 +31,7 @@
 #The phrase
 
 phrase:
-	.ascii "Hey diddle diddle!\0"
+	.ascii "Hey diddle diddle! The cat hates the fiddle!\0"
 
 
 #System call interrupt
@@ -107,7 +105,6 @@ je write_phrase
 movb %cl, BUFFER_DATA(,%edi,1)
 incl %edi
 jmp read_phrase
-
 
 
 write_phrase:
