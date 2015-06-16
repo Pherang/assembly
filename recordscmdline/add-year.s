@@ -1,5 +1,6 @@
 #Purpose: To add a year to records that are read in.
-#	Additionally it will read and write to the same file using #	the LSEEK system call.
+#	Additionally it will read and write to the same file using the LSEEK system call.
+#	Register %edi will be used to track and maneouver the file offset.
 #Input: A file specified
 #
 #Output: An output file called testout.dat that contains the modified data.
@@ -52,26 +53,17 @@ movl $0666, %edx
 int $LINUX_SYSCALL
 
 #Save the file descriptor
-
 movl %eax, ST_INPUT_DESCRIPTOR(%ebp)
 
-#Open the output file
-#movl $SYS_OPEN, %eax
-#movl ST_ARGV_1(%ebp), %ebx
-#movl $O_RDWR, %ecx
-#movl $0666, %edx
-#int $LINUX_SYSCALL
-
-#Save the file descriptor
-
-#movl %eax, ST_OUTPUT_DESCRIPTOR(%ebp)
+#Throughout the loop everytime we read or write the file we incremement or decrement %edi 
+#by the bytes written or read.
 
 loop_begin:
 pushl ST_INPUT_DESCRIPTOR(%ebp)
 pushl $record_buffer
 call read_record
 addl $8, %esp
-addl $RECORD_SIZE, %edi
+addl %eax, %edi
 
 #Returns the number of bytes read.
 #If it isn't the same number we requested
@@ -99,8 +91,8 @@ call write_record
 addl $8, %esp
 
 
-#Move file position forward
-addl $RECORD_SIZE, %edi
+#Move file position to the end of the record that was modified.
+addl %eax, %edi
 
 movl $19, %eax
 movl ST_INPUT_DESCRIPTOR(%ebp), %ebx
