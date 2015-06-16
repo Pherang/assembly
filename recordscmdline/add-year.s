@@ -1,5 +1,5 @@
 #Purpose: To add a year to records that are read in.
-#
+#	Additionally it will read and write to the same file using #	the LSEEK system call.
 #Input: A file specified
 #
 #Output: An output file called testout.dat that contains the modified data.
@@ -8,11 +8,6 @@
 .include "record-def.s"
 
 .section .data
-input_file_name:
-.ascii "test.dat\0"
-
-output_file_name:
-.ascii "test.out\0"
 
 .section .bss
 .lcomm record_buffer, RECORD_SIZE
@@ -23,8 +18,21 @@ output_file_name:
 #FYI, we could have used memory addresses in a .data section instead
 .equ ST_INPUT_DESCRIPTOR, -4
 .equ ST_OUTPUT_DESCRIPTOR, -8
+.equ ST_BUFFER_LOCATION, -12
 
 .section .text
+
+#STACK POSITIONS
+.equ ST_SIZE_RESERVE, 8
+.equ ST_FD_IN, -4
+.equ ST_FD_OUT, -8
+.equ ST_ARGC, 0
+.equ ST_ARGV_0, 4
+.equ ST_ARGV_1, 8
+.equ ST_ARGV_2, 12
+
+.equ O_RDWR, 02
+
 #Main program
 .globl _start
 _start:
@@ -35,9 +43,11 @@ movl %esp, %ebp
 subl $8, %esp
 
 #Open the input file
+#We'll open the same file for input and output. We also
+#specify the file using the cmdline.
 movl $SYS_OPEN, %eax
-movl $input_file_name, %ebx
-movl $0, %ecx
+movl ST_ARGV_1(%ebp), %ebx
+movl $O_RDWR, %ecx
 movl $0666, %edx
 int $LINUX_SYSCALL
 
@@ -46,21 +56,22 @@ int $LINUX_SYSCALL
 movl %eax, ST_INPUT_DESCRIPTOR(%ebp)
 
 #Open the output file
-movl $SYS_OPEN, %eax
-movl $output_file_name, %ebx
-movl $0101, %ecx
-movl $0666, %edx
-int $LINUX_SYSCALL
+#movl $SYS_OPEN, %eax
+#movl ST_ARGV_1(%ebp), %ebx
+#movl $O_RDWR, %ecx
+#movl $0666, %edx
+#int $LINUX_SYSCALL
 
 #Save the file descriptor
 
-movl %eax, ST_OUTPUT_DESCRIPTOR(%ebp)
+#movl %eax, ST_OUTPUT_DESCRIPTOR(%ebp)
 
 loop_begin:
 pushl ST_INPUT_DESCRIPTOR(%ebp)
 pushl $record_buffer
 call read_record
 addl $8, %esp
+addl $RECORD_SIZE, %edi
 
 #Returns the number of bytes read.
 #If it isn't the same number we requested
@@ -72,11 +83,30 @@ jne loop_end
 #Increment age
 incl record_buffer + RECORD_AGE
 
+subl %eax, %edi
+
+#Move file position back
+movl $19, %eax
+movl ST_INPUT_DESCRIPTOR(%ebp), %ebx
+movl %edi, %ecx
+movl $0, %edx
+int $LINUX_SYSCALL
+
 #Write the record out
-pushl ST_OUTPUT_DESCRIPTOR(%ebp)
+pushl ST_INPUT_DESCRIPTOR(%ebp)
 pushl $record_buffer
 call write_record
 addl $8, %esp
+
+
+#Move file position forward
+addl $RECORD_SIZE, %edi
+
+movl $19, %eax
+movl ST_INPUT_DESCRIPTOR(%ebp), %ebx
+movl %edi, %ecx
+movl $0, %edx
+int $LINUX_SYSCALL
 
 jmp loop_begin
 

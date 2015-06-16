@@ -14,6 +14,15 @@ file_name:
 .globl _start
 _start:
 
+#STACK POSITIONS
+.equ ST_SIZE_RESERVE, 8
+.equ ST_FD_IN, -4
+.equ ST_FD_OUT, -8
+.equ ST_ARGC, 0
+.equ ST_ARGV_0, 4
+.equ ST_ARGV_1, 8
+.equ ST_ARGV_2, 12
+
 #These are the locations on the stack 
 #where we will store the input and output descriptors
 #FYI, we could have used memory addresses in a .data section instead
@@ -27,7 +36,7 @@ subl $8, %esp
 
 #Open the file
 movl $SYS_OPEN, %eax
-movl $file_name, %ebx
+movl ST_ARGV_1(%ebp), %ebx
 movl $0, %ecx
 movl $0666, %edx
 int $LINUX_SYSCALL

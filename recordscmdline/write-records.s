@@ -29,7 +29,7 @@ record1:
 	.byte 0
 	.endr
 	
-	.long 199
+	.long 65
 
 record2:
 	.ascii "Marilyn\0"
@@ -43,11 +43,11 @@ record2:
 	.endr
 
 	.ascii "2224 S Johannan St\nChicago, IL 12345\0"
-	.rept 203
+	.rept 202
 	.byte 0
 	.endr
 	
-	.long 29
+	.long 68
 
 record3:
 	.ascii "Derrick\0"
@@ -65,7 +65,7 @@ record3:
 	.byte 0
 	.endr
 
-	.long 203
+	.long 70
 			
 record4:
 	.ascii "Donald\0"
@@ -83,15 +83,25 @@ record4:
 	.byte 0
 	.endr
 
-	.long 22
+	.long 66
 
 file_name:
 	.ascii "test.dat\0"
 
 	.equ ST_FILE_DESCRIPTOR, -4
 
+
 .section .text
 .globl _start
+
+#STACK POSITIONS
+.equ ST_SIZE_RESERVE, 8
+.equ ST_FD_IN, -4
+.equ ST_FD_OUT, -8
+.equ ST_ARGC, 0
+.equ ST_ARGV_0, 4
+.equ ST_ARGV_1, 8
+.equ ST_ARGV_2, 12
 
 _start:
 
@@ -99,9 +109,9 @@ _start:
 movl %esp, %ebp
 subl $4, %esp
 
-#open the file
+#open the output file
 movl $SYS_OPEN, %eax
-movl $file_name, %ebx
+movl ST_ARGV_1(%ebp), %ebx
 movl $03101, %ecx	#This creates file if it doesn't exist
 movl $0666, %edx
 int $LINUX_SYSCALL

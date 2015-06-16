@@ -1,7 +1,7 @@
 #!/bin/bash
 # Remove the binary before attempting assemble and link it again.
-rm ./build/read-age
-rm read-age.o
+rm ./build/read-records
+rm read-records.o
 rm write-newline.o
 rm read-record.o
 rm count-chars.o
