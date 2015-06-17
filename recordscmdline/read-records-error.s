@@ -9,8 +9,11 @@
 file_name:
 .ascii "test.dat\0"
 
-error_code:
+error_code14:
 .ascii "Error no file specified\0"
+
+error_code2:
+.ascii "Error specified filename doesn\'t exist\0"
 
 .section .bss
 .lcomm record_buffer, RECORD_SIZE
@@ -51,7 +54,11 @@ int $LINUX_SYSCALL
 #Check that a file descriptor has been returned. -14 appears to be an error
 
 cmpl $-14, %eax
-je error_reading
+je error_reading14
+
+
+cmpl $-2, %eax
+je error_reading2
 #Save the file descriptor
 
 movl %eax, ST_INPUT_DESCRIPTOR(%ebp)
@@ -100,18 +107,38 @@ movl $SYS_EXIT, %eax
 movl $0, %ebx
 int $LINUX_SYSCALL
 
-error_reading:
+error_reading14:
 
 #The write syscall needs the size of buffer to write.
-#count_chars returns the size of the buffer.
-#This size is put into %edx
+#This size is put into %edx since we counted the size of the error message to be 24 characters.
 
 movl $24, %edx
 movl $STDOUT, %ebx
 movl $SYS_WRITE, %eax
-movl $error_code , %ecx
+movl $error_code14 , %ecx
 int $LINUX_SYSCALL
 
+#Write a new line for neatness
+pushl $STDOUT 
+call write_newline
+addl $4, %esp
+
+movl $0, %ebx
+movl $SYS_EXIT, %eax
+int $LINUX_SYSCALL
+
+error_reading2:
+
+#The write syscall needs the size of buffer to write.
+#This size is put into %edx since we counted the size of the error message to be 24 characters.
+
+movl $42, %edx
+movl $STDOUT, %ebx
+movl $SYS_WRITE, %eax
+movl $error_code2 , %ecx
+int $LINUX_SYSCALL
+
+#Write a new line for neatness
 pushl $STDOUT 
 call write_newline
 addl $4, %esp
