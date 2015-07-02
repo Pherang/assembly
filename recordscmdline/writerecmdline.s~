@@ -1,0 +1,61 @@
+#This program will take input from STDIN
+#and write the data to a file specified from the cmd line as well.
+
+.include "linux.s"
+.include "record-def.s"
+
+.section .data
+
+.equ ST_FILE_DESCRIPTOR, -4
+
+
+.section .text
+.globl _start
+
+#STACK POSITIONS
+.equ ST_SIZE_RESERVE, 8
+.equ ST_FD_IN, -4
+.equ ST_FD_OUT, -8
+.equ ST_ARGC, 0
+.equ ST_ARGV_0, 4
+.equ ST_ARGV_1, 8
+.equ ST_ARGV_2, 12
+
+_start:
+
+#Standard stack operations
+movl %esp, %ebp
+subl $4, %esp
+
+#open the output file
+movl $SYS_OPEN, %eax
+movl ST_ARGV_1(%ebp), %ebx
+movl $03101, %ecx	#This creates file if it doesn't exist
+movl $0666, %edx
+int $LINUX_SYSCALL
+
+#Store the file descriptor away
+movl %eax, ST_FILE_DESCRIPTOR(%ebp)
+
+#open the input from STDIN 
+movl $SYS_OPEN, %eax
+movl $STDIN, %ebx
+movl $0, %ecx	#This creates file if it doesn't exist
+movl $0666, %edx
+int $LINUX_SYSCALL
+
+#Write the record obtained from STDIN
+pushl ST_FILE_DESCRIPTOR(%ebp)
+pushl $record1
+call write_record
+addl $8, %esp
+
+#Close the file descriptor
+movl $SYS_CLOSE, %eax
+movl ST_FILE_DESCRIPTOR(%ebp), %ebx
+int $LINUX_SYSCALL
+
+#Exit the program
+movl $SYS_EXIT, %eax
+movl $0, %ebx
+int $LINUX_SYSCALL

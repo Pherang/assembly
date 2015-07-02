@@ -7,8 +7,9 @@
 #	  returns a status code.
 
 #STACK LOCAL VARIABLES
-.equ ST_WRITE_BUFFER, 8
-.equ ST_FILEDES, 12
+.equ ST_BUFFSIZE, 8
+.equ ST_WRITE_BUFFER, 12
+.equ ST_FILEDES, 16
 
 .section .text
 .globl write_record
@@ -21,7 +22,7 @@ movl %esp, %ebp
 pushl %ebx
 movl ST_FILEDES(%ebp), %ebx
 movl ST_WRITE_BUFFER(%ebp), %ecx
-movl $RECORD_SIZE, %edx
+movl ST_BUFFSIZE(%ebp), %edx
 movl $SYS_WRITE, %eax
 int $LINUX_SYSCALL
 
