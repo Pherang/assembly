@@ -1,5 +1,8 @@
 # assembly
-<<<<<<< HEAD
+
+Learning from the book "Programming from the Ground Up" by Jonathan Bartlett
+I want to finish this book so starting it up again in 2018.
+
 Code while I"m learning assembly
 =======
 Programs created on my assembly journey
