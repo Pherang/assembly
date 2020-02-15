@@ -9,13 +9,14 @@
 .section .data
 
 .section .text
-#.globl _start
+
+.globl _start
 _start:
 	movl $1, %eax	# This is the linux kernel
 			# command number (system call)
 			# for exiting a program
 
-	movl $10, %ebx	# This is the status number returned.
+	movl $101, %ebx	# This is the status number returned.
 			# Change this and it will return
 			# different things to echo $?
 
